@@ -89,23 +89,31 @@ export default function LotesClient({ estudoId, premissas }: { estudoId: string;
 
       <div className="rounded-[16px] border p-4" style={{ background: 'var(--surface-2)', borderColor: 'var(--border)' }}>
         <label className="mb-2 block text-[12px]" style={{ color: 'var(--text-2)' }}>
-          Colar em lote — uma linha por lote, formato <span className="num">area,fator</span> (fator opcional, padrao 1)
+          Colar em lote — uma linha por lote, formato <span className="num">area,fator</span> (fator opcional, padrao 1).
+          O texto cinza abaixo é só um exemplo do formato — a caixa começa vazia, cole ou digite os seus lotes nela.
         </label>
         <textarea
           rows={4}
           value={colar}
           onChange={(e) => setColar(e.target.value)}
-          placeholder={'172.74,1\n179.88,1\n179.82,1.12'}
+          placeholder={'Exemplo do formato (não é dado real — cole o seu aqui):\n172.74,1\n179.88,1'}
           className="w-full font-mono text-[12px]"
         />
-        <button
-          onClick={importarColado}
-          disabled={!colar.trim()}
-          className="mt-2 rounded-[8px] border px-3 py-1.5 text-[12px] disabled:opacity-50"
-          style={{ borderColor: 'var(--border)', color: 'var(--text-2)' }}
-        >
-          Importar e substituir lista
-        </button>
+        <div className="mt-2 flex items-center gap-3">
+          <button
+            onClick={importarColado}
+            disabled={!colar.trim()}
+            className="rounded-[8px] border px-3 py-1.5 text-[12px] disabled:opacity-40"
+            style={{ borderColor: 'var(--border)', color: 'var(--text-2)' }}
+          >
+            Importar e substituir lista
+          </button>
+          <span className="text-[11.5px]" style={{ color: colar.trim() ? 'var(--good)' : 'var(--text-3)' }}>
+            {colar.trim()
+              ? `${colar.trim().split('\n').filter(Boolean).length} linha(s) prontas para importar`
+              : 'Caixa vazia — nada para importar ainda'}
+          </span>
+        </div>
       </div>
 
       <div className="overflow-x-auto rounded-[16px] border" style={{ borderColor: 'var(--border)' }}>

@@ -37,17 +37,10 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="mb-8 flex items-center gap-3">
-          <div
-            className="flex h-9 w-9 items-center justify-center rounded-[9px] text-[13px] font-extrabold text-white"
-            style={{ background: 'linear-gradient(135deg,var(--accent),#7A5CFA)' }}
-          >
-            PV
-          </div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo-sia.png" alt="SIA Planejamento Urbano" className="h-10 w-auto shrink-0" />
           <div>
             <div className="text-[14px] font-bold">Plataforma de Viabilidade</div>
-            <div className="text-[11px] uppercase tracking-wide" style={{ color: 'var(--text-3)' }}>
-              Estudos economico-financeiros
-            </div>
           </div>
         </div>
 

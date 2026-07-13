@@ -107,12 +107,26 @@ export const CENARIO_BASE: Cenario = {
   custoMult: 1,
 };
 
+// Cenario conservador padrao — usado como referencia de comparacao no dashboard
+// (velocidade de vendas mais lenta, preco menor, custo mais alto).
+export const CENARIO_CONSERVADOR: Cenario = {
+  velocidade: 0.35,
+  preco: 0.94,
+  jurosMult: 1,
+  sistema: 'price',
+  entradaMult: 1,
+  custoMult: 1.08,
+};
+
 export interface ModeloResultado {
   months: number[];
   idx: (t: number) => number;
   T0: number;
   T1: number;
   receitaBruta: number[];
+  recAvista: number[];
+  recCurta: number[];
+  recLonga: number[];
   custoDireto: number[];
   lotesVendidosMes: number[];
   resultado: number[];
@@ -120,23 +134,36 @@ export interface ModeloResultado {
   minVal: number;
   minIdx: number;
   mesPico: number;
+  picoInvestimento: number;
+  caixaMinimo: number;
   payback: number | null;
   capitalNecessario: number;
   vgvBase: number;
   vgvNominal: number;
   vgvPresente: number;
+  nomAvista: number;
+  nomCurta: number;
+  nomLonga: number;
   custoTotal: number;
   custoImplantacao: number;
   custoTerreno: number;
+  custoObraTotal: number;
+  custoProjTotal: number;
+  custoComJurTotal: number;
   custoPorLote: number;
   custoPorM2Urbanizado: number;
   lucroBrutoTotal: number;
   lucroLiquidoTotal: number;
+  resultadoEmpreendedor: number;
+  resultadoTerrenista: number;
   margemLiquida: number;
   tirMensal: number;
   tirAnual: number;
   vpl: number;
   precoMedio: number;
+  loteAreaMedia: number;
+  loteValorAvista: number;
+  loteParcelaMedia: number;
   roi: number;
   moic: number;
 }
@@ -364,6 +391,9 @@ export function buildModel(p: Premissas, scn: Cenario = CENARIO_BASE): ModeloRes
     }
   }
 
+  const custoObraTotal = custoObraArr.reduce((a, b) => a + b, 0);
+  const custoProjTotal = custoProjArr.reduce((a, b) => a + b, 0);
+  const custoComJurTotal = custoComArr.reduce((a, b) => a + b, 0) + custoJurArr.reduce((a, b) => a + b, 0);
   const custoImplantacao = custoDireto.reduce((a, b) => a + b, 0);
   const custoTerreno = p.valorTerraEconomico * scn.custoMult;
   const custoTotal = custoImplantacao + custoTerreno;
@@ -373,6 +403,18 @@ export function buildModel(p: Premissas, scn: Cenario = CENARIO_BASE): ModeloRes
   const lucroLiquidoTotal = resultado.reduce((a, b) => a + b, 0) - custoTerreno;
   const margemLiquida = lucroLiquidoTotal / vgvNominal;
   const capitalNecessario = -minVal;
+  // Sem modulo de parcerias configurado, o empreendedor recebe 100% do resultado.
+  const resultadoTerrenista = 0;
+  const resultadoEmpreendedor = lucroLiquidoTotal - resultadoTerrenista;
+
+  const loteAreaMedia = p.areaVendavel / qtdLotesReal;
+  const loteValorAvista = precoMedio * (1 - p.descontoAvista);
+  const loteSaldoFinanciado = precoMedio * (1 - entradaPct);
+  const jurosTotalLonga = juros * (p.prazoLonga + 1) / 2;
+  const loteParcelaMedia =
+    scn.sistema === 'sac'
+      ? (loteSaldoFinanciado * (1 + jurosTotalLonga)) / p.prazoLonga
+      : loteSaldoFinanciado * priceFactor(juros, p.prazoLonga);
 
   // TIR = IRR(Resultado_Mes) na planilha — sequencial, SEM subtrair a terra do mes 0.
   // O custo da terra so entra depois, no Lucro Liquido (Resultado_Caixa - Valor_Terra_Economico),
@@ -392,6 +434,9 @@ export function buildModel(p: Premissas, scn: Cenario = CENARIO_BASE): ModeloRes
     T0,
     T1,
     receitaBruta,
+    recAvista,
+    recCurta,
+    recLonga,
     custoDireto,
     lotesVendidosMes,
     resultado,
@@ -399,23 +444,36 @@ export function buildModel(p: Premissas, scn: Cenario = CENARIO_BASE): ModeloRes
     minVal,
     minIdx,
     mesPico: months[minIdx],
+    picoInvestimento: capitalNecessario,
+    caixaMinimo: minVal,
     payback: paybackT,
     capitalNecessario,
     vgvBase: vgvBaseReal,
     vgvNominal,
     vgvPresente,
+    nomAvista,
+    nomCurta,
+    nomLonga,
     custoTotal,
     custoImplantacao,
     custoTerreno,
+    custoObraTotal,
+    custoProjTotal,
+    custoComJurTotal,
     custoPorLote,
     custoPorM2Urbanizado,
     lucroBrutoTotal,
     lucroLiquidoTotal,
+    resultadoEmpreendedor,
+    resultadoTerrenista,
     margemLiquida,
     tirMensal,
     tirAnual,
     vpl,
     precoMedio,
+    loteAreaMedia,
+    loteValorAvista,
+    loteParcelaMedia,
     roi: lucroLiquidoTotal / capitalNecessario,
     moic: (capitalNecessario + lucroLiquidoTotal) / capitalNecessario,
   };
@@ -461,6 +519,86 @@ export function calcularIndiceViabilidade(m: ModeloResultado, p: Premissas): Ind
     nota <= 40 ? 'Não recomendado' : nota <= 60 ? 'Alto risco' : nota <= 80 ? 'Viável com atenção' : 'Altamente viável';
 
   return { nota, classificacao, componentes };
+}
+
+// ---------------------------------------------------------------------------
+// Analise de Risco — 6 categorias + risco geral, cada uma 0-100 (quanto maior
+// pior) com regra simples e auditavel, igual ao Indice Geral de Viabilidade.
+// Nao vem da planilha (autorizado explicitamente pelo usuario).
+// ---------------------------------------------------------------------------
+
+export interface RiscoCategoria {
+  label: string;
+  score: number; // 0-100, quanto maior pior
+  nivel: 'Baixo' | 'Moderado' | 'Alto';
+}
+
+export interface AnaliseRisco {
+  categorias: RiscoCategoria[];
+  geral: RiscoCategoria;
+}
+
+function nivelRisco(score: number): 'Baixo' | 'Moderado' | 'Alto' {
+  if (score <= 33) return 'Baixo';
+  if (score <= 66) return 'Moderado';
+  return 'Alto';
+}
+
+export function calcularRiscos(
+  m: ModeloResultado,
+  mCons: ModeloResultado,
+  p: Premissas,
+  temParceria: boolean
+): AnaliseRisco {
+  // Financeiro: margem abaixo de 15% a.a. = risco maximo, acima de 30% = risco minimo;
+  // combinado com a velocidade de retorno (payback 12 meses = otimo, 48 meses = risco maximo).
+  const riscoMargemBase = clamp(100 - ((m.margemLiquida - 0.15) / 0.15) * 100, 0, 100);
+  const riscoPaybackBase = clamp(((( m.payback ?? 48) - 12) / 36) * 100, 0, 100);
+  const financeiro = clamp(0.6 * riscoMargemBase + 0.4 * riscoPaybackBase, 0, 100);
+
+  // Comercial: quanto maior a fatia financiada a longo prazo, menor a entrada e maior a
+  // inadimplencia/distrato assumidos, maior a exposicao a calote/atraso do comprador.
+  const comercial = clamp(
+    p.mix.longa * 100 * 0.5 + (1 - p.entrada) * 40 + p.pctInad * 100 + p.pctDistrato * 100,
+    0,
+    100
+  );
+
+  // Caixa: capital proprio necessario como fracao do VGV Base (30% ou mais = risco maximo).
+  const caixa = clamp(((m.capitalNecessario / m.vgvBase) / 0.3) * 100, 0, 100);
+
+  // Parceria: sem participante configurado, o empreendedor concentra 100% do resultado
+  // (sem risco de conflito de socios); com parceria, ha risco de coordenacao/divergencia.
+  const parceria = temParceria ? 55 : 15;
+
+  // Mercado: sensibilidade do lucro liquido ao cenario conservador (venda mais lenta,
+  // preco menor, custo maior) — quanto maior a queda, mais fragil o projeto a um mercado pior.
+  const quedaLucro =
+    m.lucroLiquidoTotal > 0 ? (m.lucroLiquidoTotal - mCons.lucroLiquidoTotal) / m.lucroLiquidoTotal : 1;
+  const mercado = clamp(quedaLucro * 150, 0, 100);
+
+  // Velocidade de vendas: janela de absorcao curta (sell-out quase instantaneo) e uma
+  // premissa agressiva — janela de 12+ meses = risco minimo, 0 (venda no lançamento) = risco maximo.
+  const mesFimVendas = p.mesFimVendas ?? p.mesInicioVendas;
+  const janelaVendas = Math.max(0, mesFimVendas - p.mesInicioVendas);
+  const velocidade = clamp(100 - janelaVendas * 8, 0, 100);
+
+  const valores = [financeiro, comercial, caixa, parceria, mercado, velocidade];
+  const geralScore = valores.reduce((a, b) => a + b, 0) / valores.length;
+
+  const mk = (label: string, score: number): RiscoCategoria => ({ label, score, nivel: nivelRisco(score) });
+
+  return {
+    categorias: [
+      mk('Risco Financeiro', financeiro),
+      mk('Risco Comercial', comercial),
+      mk('Risco de Caixa', caixa),
+      mk('Risco da Parceria', parceria),
+      mk('Risco de Mercado', mercado),
+      mk('Risco de Velocidade de Vendas', velocidade),
+    ],
+    geral: mk('Risco Geral', geralScore),
+  };
 }
 
 export function npvAt(cf: number[], rMensal: number, months?: number[]): number {
@@ -674,6 +812,167 @@ export function gerarParecer(m: ModeloResultado, p: Premissas, indice: IndiceVia
       : 'Não recomendado';
 
   return { recomendacao, pontosFortes, riscos, pontosAtencao };
+}
+
+function BRLcompleta(v: number): string {
+  return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
+}
+
+// ---------------------------------------------------------------------------
+// Parecer narrativo — veredito em 5 niveis + um paragrafo unico de
+// justificativa tecnica, para exibicao em card na tela inicial do estudo
+// (complementar ao gerarParecer acima, que retorna listas de bullets para o
+// Relatorio Executivo). Reutiliza os mesmos numeros do Indice e da Analise
+// de Risco, nunca inventa um numero novo.
+// ---------------------------------------------------------------------------
+
+export type Veredito = 'Não comprar' | 'Comprar com ressalvas' | 'Boa operação' | 'Muito boa' | 'Excelente';
+
+export interface ParecerNarrativo {
+  veredito: Veredito;
+  headline: string;
+  subtitulo: string;
+  justificativa: string;
+}
+
+export const VEREDITOS: Veredito[] = ['Não comprar', 'Comprar com ressalvas', 'Boa operação', 'Muito boa', 'Excelente'];
+
+function veredito5(nota: number): Veredito {
+  if (nota < 20) return 'Não comprar';
+  if (nota < 40) return 'Comprar com ressalvas';
+  if (nota < 60) return 'Boa operação';
+  if (nota < 80) return 'Muito boa';
+  return 'Excelente';
+}
+
+const HEADLINE_VEREDITO: Record<Veredito, string> = {
+  'Não comprar': 'Operação não recomendada',
+  'Comprar com ressalvas': 'Operação com ressalvas',
+  'Boa operação': 'Boa operação',
+  'Muito boa': 'Muito boa operação',
+  Excelente: 'Excelente operação',
+};
+
+export function gerarParecerNarrativo(
+  m: ModeloResultado,
+  p: Premissas,
+  indice: IndiceViabilidade,
+  riscos: AnaliseRisco
+): ParecerNarrativo {
+  const pct1 = (v: number) => v.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+
+  const veredito = veredito5(indice.nota);
+  const spread = (m.tirAnual - p.tma) * 100;
+  const subtitulo = `TIR de ${pct1(m.tirAnual * 100)}% a.a. — spread de ${spread >= 0 ? '+' : ''}${pct1(spread)}% sobre a TMA`;
+
+  const margemOk = m.margemLiquida >= 0.2;
+  const vplOk = m.vpl > 0;
+
+  const maioresRiscos = riscos.categorias.filter((c) => c.nivel === 'Alto').sort((a, b) => b.score - a.score);
+  const ressalva =
+    maioresRiscos.length > 0
+      ? `Ressalva: ${maioresRiscos.map((r) => r.label).join(' e ')} classificado(s) como Alto — o bloco de Análise de Risco e as Oportunidades de Otimização detalham o impacto de premissas alternativas.`
+      : 'Nenhuma categoria da Análise de Risco foi classificada como Alta nas premissas atuais.';
+
+  const justificativa =
+    `O empreendimento apresenta TIR de ${pct1(m.tirAnual * 100)}% a.a., frente a uma TMA de ${pct1(p.tma * 100)}% — ` +
+    `um spread de ${pct1(spread)} p.p. ${spread >= 0 ? 'acima' : 'abaixo'} do mínimo exigido. A margem líquida projetada é de ${pct1(m.margemLiquida * 100)}%, ` +
+    `${margemOk ? 'dentro' : 'abaixo'} do mínimo aceitável de 20%. O capital próprio necessário é de ${BRLcompleta(m.capitalNecessario)}, com pico no mês ${m.mesPico}` +
+    `${m.payback !== null ? ` e payback em torno do mês ${m.payback}` : ', sem payback dentro do horizonte projetado'}. O VPL do projeto, descontado a ${pct1(p.tma * 100)}% a.a., é de ${BRLcompleta(m.vpl)}, ` +
+    `${vplOk ? 'positivo o suficiente para sustentar a decisão de compra' : 'insuficiente para sustentar a decisão de compra'}. ${ressalva}`;
+
+  return { veredito, headline: HEADLINE_VEREDITO[veredito], subtitulo, justificativa };
+}
+
+// ---------------------------------------------------------------------------
+// Oportunidades de Otimizacao — sugestoes geradas rodando o proprio motor com
+// premissas alternativas (contrafactuais reais, nao texto generico) e medindo
+// o impacto de cada uma nos indicadores do estudo.
+// ---------------------------------------------------------------------------
+
+export interface Oportunidade {
+  badge: string;
+  texto: string;
+  destaque?: string;
+  rodape?: string;
+}
+
+export function gerarOportunidades(m: ModeloResultado, mCons: ModeloResultado, p: Premissas): Oportunidade[] {
+  const out: Oportunidade[] = [];
+
+  // 1. Aumentar a entrada reduz o saldo financiado e o pico de investimento.
+  const novaEntrada = Math.min(0.9, p.entrada + 0.08);
+  if (novaEntrada > p.entrada + 1e-9) {
+    const m2 = buildModel({ ...p, entrada: novaEntrada }, CENARIO_BASE);
+    const delta = m.picoInvestimento - m2.picoInvestimento;
+    if (delta > 0) {
+      out.push({
+        badge: 'CAPITAL',
+        texto: `Aumentar a entrada de ${(p.entrada * 100).toFixed(0)}% para ~${(novaEntrada * 100).toFixed(0)}% reduziria o saldo financiado e, por consequência, o pico de investimento em torno de`,
+        destaque: BRLcompleta(delta),
+        rodape: 'menos capital próprio preso no período de obra.',
+      });
+    }
+  }
+
+  // 2. Encurtar a tabela longa antecipa recebiveis e tende a elevar o VPL.
+  const novoPrazoLonga = Math.max(12, Math.round((p.prazoLonga * 0.8) / 12) * 12);
+  if (novoPrazoLonga < p.prazoLonga) {
+    const m2 = buildModel({ ...p, prazoLonga: novoPrazoLonga }, CENARIO_BASE);
+    const deltaVpl = m2.vpl - m.vpl;
+    out.push({
+      badge: 'VPL',
+      texto: `Reduzir o prazo da tabela longa de ${p.prazoLonga} para ${novoPrazoLonga} meses antecipa recebíveis e tende a elevar o VPL em cerca de`,
+      destaque: BRLcompleta(deltaVpl),
+      rodape: 'ao custo de uma parcela mensal maior para o comprador — vale testar no módulo de Sensibilidade.',
+    });
+  }
+
+  // 3. Premissa de velocidade de vendas agressiva x cenario conservador.
+  const mesFimVendas = p.mesFimVendas ?? p.mesInicioVendas;
+  const janela = Math.max(0, mesFimVendas - p.mesInicioVendas);
+  if (janela <= 3) {
+    out.push({
+      badge: 'VELOCIDADE',
+      texto:
+        janela === 0
+          ? 'A premissa de venda 100% no mês do lançamento é agressiva. Um cenário de absorção mais gradual (ver filtro "Conservador") eleva o Capital Necessário para'
+          : `A premissa de absorção total em ${janela} meses é agressiva. Um cenário mais gradual (ver filtro "Conservador") eleva o Capital Necessário para`,
+      destaque: BRLcompleta(mCons.capitalNecessario),
+      rodape: 'dimensione o caixa disponível para esse cenário, não apenas o Base.',
+    });
+  }
+
+  // 4. Sensibilidade do VGV/lucro ao preco medio.
+  const m4 = buildModel({ ...p, precoBase: p.precoBase * 1.05 }, CENARIO_BASE);
+  out.push({
+    badge: 'PREÇO',
+    texto: `Cada +5% no preço médio (${BRLcompleta(p.precoBase)} → ${BRLcompleta(p.precoBase * 1.05)}/m²) adiciona aproximadamente`,
+    destaque: BRLcompleta(m4.vgvBase - m.vgvBase),
+    rodape: 'ao VGV Base, quase integralmente convertido em lucro líquido adicional.',
+  });
+
+  // 5. Price x SAC — qualitativo (risco juridico de capitalizacao mensal).
+  if (p.jurosPrice > 0) {
+    out.push({
+      badge: 'SISTEMA',
+      texto:
+        'Alternar de Price para SAC concentra a amortização no início do contrato — piora levemente o fluxo dos primeiros meses do comprador, mas reduz o risco jurídico de capitalização mensal discutido para financiamento direto.',
+    });
+  }
+
+  // 6. Impacto de uma futura parceria de terra no Resultado do Empreendedor.
+  const deltaTerrenista = m.lucroLiquidoTotal * 0.1;
+  out.push({
+    badge: 'TERRENISTA',
+    texto:
+      m.resultadoTerrenista === 0
+        ? 'Terrenista = empreendedor neste projeto (participação 0%). Caso entre um parceiro de terra, cada 10 p.p. de participação reduz o Resultado do Empreendedor em aproximadamente'
+        : 'Cada 10 p.p. adicional de participação do terrenista reduz o Resultado do Empreendedor em aproximadamente',
+    destaque: BRLcompleta(deltaTerrenista),
+  });
+
+  return out;
 }
 
 function BRLcurta(v: number): string {

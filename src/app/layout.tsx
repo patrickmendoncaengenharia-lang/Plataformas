@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Plataforma de Viabilidade",
-  description: "Estudos de viabilidade economico-financeira de loteamentos",
+  description: "SIA Planejamento Urbano LTDA — estudos de viabilidade economico-financeira de loteamentos",
 };
 
 export default function RootLayout({
