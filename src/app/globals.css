@@ -1,0 +1,64 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #0A0A0F;
+  --surface: #1A1A24;
+  --surface-2: #20212D;
+  --surface-3: #14141C;
+  --border: #26273A;
+  --border-strong: rgba(255,255,255,.14);
+  --text: #F1F2F7;
+  --text-2: #9B9EB2;
+  --text-3: #666981;
+  --accent: #3987E5;
+  --accent-soft: rgba(57,135,229,.14);
+  --good: #1EBE6E;
+  --good-soft: rgba(30,190,110,.14);
+  --warn: #F2AE1E;
+  --warn-soft: rgba(242,174,30,.14);
+  --crit: #E15258;
+  --crit-soft: rgba(225,82,88,.14);
+  --radius: 16px;
+  --radius-sm: 10px;
+}
+
+@theme inline {
+  --color-background: var(--bg);
+  --color-foreground: var(--text);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, "Segoe UI", Inter, Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+  background:
+    radial-gradient(ellipse 900px 500px at 15% -10%, rgba(57,135,229,.10), transparent 60%),
+    radial-gradient(ellipse 700px 500px at 100% 0%, rgba(144,133,233,.08), transparent 55%),
+    var(--bg);
+  min-height: 100vh;
+}
+
+.num { font-variant-numeric: tabular-nums; }
+
+input, select, textarea {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: 13.5px;
+  font-family: inherit;
+}
+input:focus, select:focus, textarea:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+button {
+  font-family: inherit;
+}
