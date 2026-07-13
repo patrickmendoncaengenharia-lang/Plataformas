@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { buildModel, calcularTributacao, CENARIO_BASE, type Premissas } from '@/lib/calc-engine';
+import { buildModel, calcularTributacao, cenarioBaseDe, type Premissas } from '@/lib/calc-engine';
 
 const BRL = (v: number) =>
   v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
@@ -11,10 +11,10 @@ export default function TributacaoClient({ premissas }: { premissas: Premissas }
   const [regime, setRegime] = useState<'presumido' | 'real'>('presumido');
   const [pctIss, setPctIss] = useState(0);
 
-  const baseAtual = useMemo(() => buildModel(premissas, CENARIO_BASE), [premissas]);
+  const baseAtual = useMemo(() => buildModel(premissas, cenarioBaseDe(premissas)), [premissas]);
 
   const semImposto = useMemo(
-    () => buildModel({ ...premissas, pctImpostos: 0 }, CENARIO_BASE),
+    () => buildModel({ ...premissas, pctImpostos: 0 }, cenarioBaseDe(premissas)),
     [premissas]
   );
 
@@ -33,7 +33,7 @@ export default function TributacaoClient({ premissas }: { premissas: Premissas }
   );
 
   const modeloComRegime = useMemo(
-    () => buildModel({ ...premissas, pctImpostos: tributacao.pctImpostosEfetivo }, CENARIO_BASE),
+    () => buildModel({ ...premissas, pctImpostos: tributacao.pctImpostosEfetivo }, cenarioBaseDe(premissas)),
     [premissas, tributacao]
   );
 

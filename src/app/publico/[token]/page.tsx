@@ -5,8 +5,8 @@ import {
   calcularRiscos,
   gerarOportunidades,
   gerarParecerNarrativo,
-  CENARIO_BASE,
-  CENARIO_CONSERVADOR,
+  cenarioBaseDe,
+  cenarioConservadorDe,
   type Premissas,
 } from '@/lib/calc-engine';
 import { createPublicClient } from '@/lib/supabase/public';
@@ -27,8 +27,8 @@ export default async function EstudoPublicoPage({ params }: { params: Promise<{ 
   if (!estudo) notFound();
 
   const premissas = estudo.premissas as Premissas;
-  const model = buildModel(premissas, CENARIO_BASE);
-  const modelCons = buildModel(premissas, CENARIO_CONSERVADOR);
+  const model = buildModel(premissas, cenarioBaseDe(premissas));
+  const modelCons = buildModel(premissas, cenarioConservadorDe(premissas));
   const indice = calcularIndiceViabilidade(model, premissas);
   const riscos = calcularRiscos(model, modelCons, premissas, false);
   const oportunidades = gerarOportunidades(model, modelCons, premissas);

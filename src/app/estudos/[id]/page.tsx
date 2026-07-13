@@ -7,8 +7,8 @@ import {
   calcularRiscos,
   gerarOportunidades,
   gerarParecerNarrativo,
-  CENARIO_BASE,
-  CENARIO_CONSERVADOR,
+  cenarioBaseDe,
+  cenarioConservadorDe,
   type Premissas,
 } from '@/lib/calc-engine';
 import TopBar from '@/components/TopBar';
@@ -49,8 +49,8 @@ export default async function EstudoPage({ params }: { params: Promise<{ id: str
     .eq('estudo_id', id);
 
   const premissas = estudo.premissas as Premissas;
-  const model = buildModel(premissas, CENARIO_BASE);
-  const modelCons = buildModel(premissas, CENARIO_CONSERVADOR);
+  const model = buildModel(premissas, cenarioBaseDe(premissas));
+  const modelCons = buildModel(premissas, cenarioConservadorDe(premissas));
   const indice = calcularIndiceViabilidade(model, premissas);
   const riscos = calcularRiscos(model, modelCons, premissas, (qtdParticipantes ?? 0) > 0);
   const oportunidades = gerarOportunidades(model, modelCons, premissas);

@@ -7,6 +7,10 @@ export interface DonutSegment {
   label: string;
   value: number;
   color: string;
+  /** taxa/origem do valor, ex: "6,0% da receita" — mostrado pequeno abaixo do
+   * rotulo pra deixar claro que o % ao lado e a fatia deste item dentro do
+   * total do grafico, nao a taxa aplicada sobre sua base de origem. */
+  detalhe?: string;
 }
 
 // Donut interativo — passar o mouse (ou tocar/clicar, que fixa a selecao)
@@ -117,7 +121,14 @@ export default function DonutChart({
             onClick={() => toggle(i)}
           >
             <span className="inline-block h-2 w-2 shrink-0 rounded-full" style={{ background: s.color }} />
-            <span className="truncate">{s.label}</span>
+            <span className="flex min-w-0 flex-col">
+              <span className="truncate">{s.label}</span>
+              {s.detalhe && (
+                <span className="truncate text-[10px]" style={{ color: 'var(--text-3)' }}>
+                  {s.detalhe}
+                </span>
+              )}
+            </span>
             <b className="num ml-auto shrink-0" style={{ color: 'var(--text)' }}>
               {sum > 0 ? ((s.value / sum) * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) : '0'}%
             </b>

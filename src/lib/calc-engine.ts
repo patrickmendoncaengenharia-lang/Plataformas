@@ -87,6 +87,10 @@ export interface Premissas {
   cronogramaObra: number[];
   /** cronograma fisico-financeiro detalhado por etapa (opcional) */
   cronogramaEtapas?: { nome: string; custos: number[] }[];
+  /** sistema de amortizacao do financiamento direto ao comprador (tabelas curta/longa) —
+   * premissa persistida do estudo, editavel em Configuracoes. Default 'price' se ausente
+   * (estudos criados antes deste campo existir). */
+  sistemaAmortizacao?: 'price' | 'sac';
 }
 
 export interface Cenario {
@@ -117,6 +121,17 @@ export const CENARIO_CONSERVADOR: Cenario = {
   entradaMult: 1,
   custoMult: 1.08,
 };
+
+// CENARIO_BASE/CENARIO_CONSERVADOR acima assumem Price — estas duas funcoes
+// aplicam o sistema de amortizacao realmente configurado no estudo (Premissas.
+// sistemaAmortizacao), para que a premissa editada em Configuracoes valha em
+// todo lugar que constroi o modelo base/conservador a partir do estudo salvo.
+export function cenarioBaseDe(p: Premissas): Cenario {
+  return { ...CENARIO_BASE, sistema: p.sistemaAmortizacao ?? 'price' };
+}
+export function cenarioConservadorDe(p: Premissas): Cenario {
+  return { ...CENARIO_CONSERVADOR, sistema: p.sistemaAmortizacao ?? 'price' };
+}
 
 export interface ModeloResultado {
   months: number[];

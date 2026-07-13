@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import {
   buildModel,
-  CENARIO_BASE,
+  cenarioBaseDe,
   calcularTodosParticipantes,
   type Premissas,
   type Participante,
@@ -85,7 +85,7 @@ export default function ParceriasClient({
   );
   const [salvando, setSalvando] = useState(false);
 
-  const model = useMemo(() => buildModel(premissas, CENARIO_BASE), [premissas]);
+  const model = useMemo(() => buildModel(premissas, cenarioBaseDe(premissas)), [premissas]);
   const indicadores = useMemo(
     () => calcularTodosParticipantes(participantes, premissas, model),
     [participantes, premissas, model]

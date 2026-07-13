@@ -256,14 +256,29 @@ export default function EstudoDashboardBody({
     (premissas.pctInad + premissas.pctDistrato + premissas.pctGestaoCarteira) * model.vgvNominal;
 
   const composicaoCustos = [
-    { label: 'Terreno (custo econ.)', value: model.custoTerreno, color: CHART_COLORS.blue },
-    { label: 'Infraestrutura', value: model.custoObraTotal, color: CHART_COLORS.green },
-    { label: 'Projetos/Licenciamento', value: model.custoProjTotal, color: CHART_COLORS.amber },
-    { label: 'Comercial + comissão', value: despesaComissao, color: CHART_COLORS.purple },
-    { label: 'Marketing', value: despesaMarketing, color: CHART_COLORS.teal },
-    { label: 'Administração/Jurídico', value: despesaAdminJuridico, color: CHART_COLORS.orange },
-    { label: 'Tributos', value: despesaTributos, color: CHART_COLORS.red },
-    { label: 'Conting./Inadimplência', value: despesaContingInad, color: CHART_COLORS.gray },
+    { label: 'Terreno (custo econ.)', value: model.custoTerreno, color: CHART_COLORS.blue, detalhe: 'custo econômico da terra' },
+    { label: 'Infraestrutura', value: model.custoObraTotal, color: CHART_COLORS.green, detalhe: 'execução física da obra' },
+    { label: 'Projetos/Licenciamento', value: model.custoProjTotal, color: CHART_COLORS.amber, detalhe: 'custo fixo de projetos' },
+    {
+      label: 'Comercial + comissão',
+      value: despesaComissao,
+      color: CHART_COLORS.purple,
+      detalhe: `${PCT(premissas.pctComissao)} da receita`,
+    },
+    { label: 'Marketing', value: despesaMarketing, color: CHART_COLORS.teal, detalhe: `${PCT(premissas.pctMarketing)} da receita` },
+    {
+      label: 'Administração/Jurídico',
+      value: despesaAdminJuridico,
+      color: CHART_COLORS.orange,
+      detalhe: `${PCT(premissas.pctAdmin)} do custo direto + fixo`,
+    },
+    { label: 'Tributos', value: despesaTributos, color: CHART_COLORS.red, detalhe: `${PCT(premissas.pctImpostos)} da receita` },
+    {
+      label: 'Conting./Inadimplência',
+      value: despesaContingInad,
+      color: CHART_COLORS.gray,
+      detalhe: `${PCT(premissas.pctConting)} do custo direto + ${PCT(premissas.pctInad + premissas.pctDistrato + premissas.pctGestaoCarteira)} da receita`,
+    },
   ];
 
   const corClassificacao =
@@ -498,7 +513,7 @@ export default function EstudoDashboardBody({
             <ChartCard title="Composição do VGV" subtitle="Por modalidade comercial (valor nominal)">
               <DonutChart segments={composicaoVgv} total={model.vgvNominal} />
             </ChartCard>
-            <ChartCard title="Composição de Custos" subtitle="Terra, obra, despesas e tributos">
+            <ChartCard title="Composição de Custos" subtitle="Terra, obra, despesas e tributos — % é a fatia de cada item neste total, não a taxa aplicada">
               <DonutChart segments={composicaoCustos} />
             </ChartCard>
           </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { buildModel, CENARIO_BASE, type Premissas } from '@/lib/calc-engine';
+import { buildModel, cenarioBaseDe, type Premissas } from '@/lib/calc-engine';
 
 const BRL = (v: number) =>
   v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
@@ -83,7 +83,7 @@ export default function SensibilidadeClient({ premissas }: { premissas: Premissa
   const [prazoObra, setPrazoObra] = useState(0);
   const [velocidade, setVelocidade] = useState(0);
 
-  const base = useMemo(() => buildModel(premissas, CENARIO_BASE), [premissas]);
+  const base = useMemo(() => buildModel(premissas, cenarioBaseDe(premissas)), [premissas]);
 
   const atual = useMemo(() => {
     const premissasAjustadas: Premissas = {
@@ -91,7 +91,7 @@ export default function SensibilidadeClient({ premissas }: { premissas: Premissa
       prazoObra: Math.max(1, premissas.prazoObra + prazoObra),
     };
     const cenario = {
-      ...CENARIO_BASE,
+      ...cenarioBaseDe(premissas),
       preco: 1 + preco / 100,
       custoMult: 1 + custo / 100,
       velocidade: Math.max(0.1, 1 + velocidade / 100),

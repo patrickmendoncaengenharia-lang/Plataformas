@@ -5,7 +5,7 @@ import {
   buildModel,
   calcularIndiceViabilidade,
   gerarParecer,
-  CENARIO_BASE,
+  cenarioBaseDe,
   type Premissas,
 } from '@/lib/calc-engine';
 import { fmtMesAno } from '@/lib/dates';
@@ -67,7 +67,7 @@ export default async function RelatorioPage({ params }: { params: Promise<{ id: 
   if (!estudo) notFound();
 
   const p = estudo.premissas as Premissas;
-  const m = buildModel(p, CENARIO_BASE);
+  const m = buildModel(p, cenarioBaseDe(p));
   const indice = calcularIndiceViabilidade(m, p);
   const parecer = gerarParecer(m, p, indice);
   const corIndice =
