@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import type { Lote, Premissas } from '@/lib/calc-engine';
+import type { Lote, Premissas, Quadra } from '@/lib/calc-engine';
 
 const BRL = (v: number) =>
   v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 2 });
@@ -14,9 +14,22 @@ export default function LotesClient({ estudoId, premissas }: { estudoId: string;
       ? premissas.lotes
       : []
   );
+  const [quadras, setQuadras] = useState<Quadra[]>(premissas.quadras ?? []);
   const [colar, setColar] = useState('');
   const [salvando, setSalvando] = useState(false);
   const [salvo, setSalvo] = useState(false);
+
+  function addQuadra() {
+    setQuadras((prev) => [...prev, { nome: String.fromCharCode(65 + prev.length), lotes: 0, area: 0 }]);
+  }
+
+  function removerQuadra(i: number) {
+    setQuadras((prev) => prev.filter((_, idx) => idx !== i));
+  }
+
+  function atualizarQuadra(i: number, campo: keyof Quadra, valor: string | number) {
+    setQuadras((prev) => prev.map((q, idx) => (idx === i ? { ...q, [campo]: valor } : q)));
+  }
 
   const areaTotal = useMemo(() => lotes.reduce((a, l) => a + l.area, 0), [lotes]);
   const vgvBasePreview = useMemo(
@@ -52,7 +65,7 @@ export default function LotesClient({ estudoId, premissas }: { estudoId: string;
 
   async function salvar() {
     setSalvando(true);
-    const novaPremissas: Premissas = { ...premissas, lotes, qtdLotes: lotes.length };
+    const novaPremissas: Premissas = { ...premissas, lotes, qtdLotes: lotes.length, quadras };
     const { error } = await supabase
       .from('estudos')
       .update({ premissas: novaPremissas, atualizado_em: new Date().toISOString() })
@@ -85,6 +98,82 @@ export default function LotesClient({ estudoId, premissas }: { estudoId: string;
           </div>
           <div className="num text-[19px] font-extrabold">{BRL(vgvBasePreview)}</div>
         </div>
+      </div>
+
+      <div className="rounded-[16px] border p-4" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
+        <div className="mb-3 flex items-center justify-between">
+          <h3 className="text-[13px] font-bold">Quadras</h3>
+          <span className="text-[11.5px]" style={{ color: 'var(--text-3)' }}>
+            Aparece no cabeçalho do estudo como &quot;Lotes ({quadras.length} quadras)&quot;
+          </span>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-[12.5px]">
+            <thead>
+              <tr style={{ background: 'var(--surface-2)' }}>
+                <th className="px-3 py-2 text-left" style={{ color: 'var(--text-2)' }}>
+                  Nome
+                </th>
+                <th className="px-3 py-2 text-right" style={{ color: 'var(--text-2)' }}>
+                  Nº de lotes
+                </th>
+                <th className="px-3 py-2 text-right" style={{ color: 'var(--text-2)' }}>
+                  Área (m²)
+                </th>
+                <th className="px-3 py-2"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {quadras.map((q, i) => (
+                <tr key={i} style={{ borderTop: '1px solid var(--border)' }}>
+                  <td className="px-1 py-1">
+                    <input
+                      value={q.nome}
+                      onChange={(e) => atualizarQuadra(i, 'nome', e.target.value)}
+                      className="w-full"
+                      style={{ width: 100 }}
+                    />
+                  </td>
+                  <td className="px-1 py-1">
+                    <input
+                      type="number"
+                      value={q.lotes}
+                      onChange={(e) => atualizarQuadra(i, 'lotes', +e.target.value)}
+                      className="w-full text-right"
+                    />
+                  </td>
+                  <td className="px-1 py-1">
+                    <input
+                      type="number"
+                      value={q.area}
+                      onChange={(e) => atualizarQuadra(i, 'area', +e.target.value)}
+                      className="w-full text-right"
+                    />
+                  </td>
+                  <td className="px-2 py-1 text-right">
+                    <button onClick={() => removerQuadra(i)} style={{ color: 'var(--crit)' }} className="text-[12px]">
+                      Remover
+                    </button>
+                  </td>
+                </tr>
+              ))}
+              {quadras.length === 0 && (
+                <tr>
+                  <td colSpan={4} className="px-3 py-4 text-center text-[12.5px]" style={{ color: 'var(--text-2)' }}>
+                    Nenhuma quadra cadastrada.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+        <button
+          onClick={addQuadra}
+          className="mt-3 rounded-[8px] border px-3 py-1.5 text-[12px]"
+          style={{ borderColor: 'var(--border)', color: 'var(--text-2)' }}
+        >
+          + Adicionar quadra
+        </button>
       </div>
 
       <div className="rounded-[16px] border p-4" style={{ background: 'var(--surface-2)', borderColor: 'var(--border)' }}>
