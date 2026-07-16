@@ -38,6 +38,8 @@ export default async function ConfiguracoesPage({ params }: { params: Promise<{ 
             proprietario: estudo.proprietario ?? '',
             responsavel_nome: estudo.responsavel_nome ?? '',
             responsavel_crea: estudo.responsavel_crea ?? '',
+            tipo_empreendimento: estudo.tipo_empreendimento ?? 'loteamento',
+            finalidade: estudo.finalidade ?? 'residencial',
           }}
           premissas={estudo.premissas as Premissas}
         />

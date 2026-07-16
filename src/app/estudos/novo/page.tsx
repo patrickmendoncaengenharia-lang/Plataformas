@@ -48,6 +48,8 @@ export default function NovoEstudoPage() {
   const [spe, setSpe] = useState('');
   const [responsavelNome, setResponsavelNome] = useState('');
   const [responsavelCrea, setResponsavelCrea] = useState('');
+  const [tipoEmpreendimento, setTipoEmpreendimento] = useState<'loteamento' | 'condominio'>('loteamento');
+  const [finalidade, setFinalidade] = useState<'residencial' | 'comercial' | 'misto'>('residencial');
   const [proprietario, setProprietario] = useState('');
 
   const [areaGleba, setAreaGleba] = useState(0);
@@ -148,6 +150,8 @@ export default function NovoEstudoPage() {
         proprietario,
         responsavel_nome: responsavelNome,
         responsavel_crea: responsavelCrea,
+        tipo_empreendimento: tipoEmpreendimento,
+        finalidade,
         premissas,
       })
       .select('id')
@@ -191,6 +195,22 @@ export default function NovoEstudoPage() {
             </Campo>
             <Campo label="Registro (CREA/CAU)">
               <input value={responsavelCrea} onChange={(e) => setResponsavelCrea(e.target.value)} />
+            </Campo>
+            <Campo label="Tipo de empreendimento">
+              <select
+                value={tipoEmpreendimento}
+                onChange={(e) => setTipoEmpreendimento(e.target.value as 'loteamento' | 'condominio')}
+              >
+                <option value="loteamento">Loteamento</option>
+                <option value="condominio">Condomínio</option>
+              </select>
+            </Campo>
+            <Campo label="Finalidade">
+              <select value={finalidade} onChange={(e) => setFinalidade(e.target.value as 'residencial' | 'comercial' | 'misto')}>
+                <option value="residencial">Residencial</option>
+                <option value="comercial">Comercial</option>
+                <option value="misto">Uso misto</option>
+              </select>
             </Campo>
           </Secao>
 

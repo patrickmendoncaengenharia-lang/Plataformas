@@ -53,6 +53,8 @@ export default function ConfiguracoesClient({
     proprietario: string;
     responsavel_nome: string;
     responsavel_crea: string;
+    tipo_empreendimento: string;
+    finalidade: string;
   };
   premissas: Premissas;
 }) {
@@ -66,6 +68,12 @@ export default function ConfiguracoesClient({
   const [proprietario, setProprietario] = useState(estudo.proprietario);
   const [responsavelNome, setResponsavelNome] = useState(estudo.responsavel_nome);
   const [responsavelCrea, setResponsavelCrea] = useState(estudo.responsavel_crea);
+  const [tipoEmpreendimento, setTipoEmpreendimento] = useState<'loteamento' | 'condominio'>(
+    estudo.tipo_empreendimento === 'condominio' ? 'condominio' : 'loteamento'
+  );
+  const [finalidade, setFinalidade] = useState<'residencial' | 'comercial' | 'misto'>(
+    estudo.finalidade === 'comercial' ? 'comercial' : estudo.finalidade === 'misto' ? 'misto' : 'residencial'
+  );
 
   const [valorTerra, setValorTerra] = useState(premissas.valorTerraEconomico);
   const [areaBruta, setAreaBruta] = useState(premissas.areaGleba);
@@ -188,6 +196,8 @@ export default function ConfiguracoesClient({
         proprietario,
         responsavel_nome: responsavelNome,
         responsavel_crea: responsavelCrea,
+        tipo_empreendimento: tipoEmpreendimento,
+        finalidade,
         premissas: novaPremissas,
         atualizado_em: new Date().toISOString(),
       })
@@ -239,6 +249,22 @@ export default function ConfiguracoesClient({
         </Campo>
         <Campo label="Registro (CREA/CAU)">
           <input value={responsavelCrea} onChange={(e) => setResponsavelCrea(e.target.value)} />
+        </Campo>
+        <Campo label="Tipo de empreendimento">
+          <select
+            value={tipoEmpreendimento}
+            onChange={(e) => setTipoEmpreendimento(e.target.value as 'loteamento' | 'condominio')}
+          >
+            <option value="loteamento">Loteamento</option>
+            <option value="condominio">Condomínio</option>
+          </select>
+        </Campo>
+        <Campo label="Finalidade">
+          <select value={finalidade} onChange={(e) => setFinalidade(e.target.value as 'residencial' | 'comercial' | 'misto')}>
+            <option value="residencial">Residencial</option>
+            <option value="comercial">Comercial</option>
+            <option value="misto">Uso misto</option>
+          </select>
         </Campo>
       </Secao>
 

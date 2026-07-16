@@ -33,6 +33,15 @@ function fmtData(iso?: string): string {
   return `${d}/${m}/${y}`;
 }
 
+const TIPO_LABEL: Record<string, string> = { loteamento: 'Loteamento', condominio: 'Condomínio' };
+const FINALIDADE_LABEL: Record<string, string> = { residencial: 'Residencial', comercial: 'Comercial', misto: 'Uso Misto' };
+
+function rotuloTipo(tipo?: string, finalidade?: string): string {
+  const t = TIPO_LABEL[tipo ?? 'loteamento'] ?? 'Loteamento';
+  const f = FINALIDADE_LABEL[finalidade ?? 'residencial'] ?? 'Residencial';
+  return `${t} ${f}`;
+}
+
 export default async function EstudoPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
@@ -98,7 +107,7 @@ export default async function EstudoPage({ params }: { params: Promise<{ id: str
               <div className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-4">
                 <MetaItem label="Data-base" value={fmtData(premissas.datas?.dataBase) || fmtData(estudo.data_base)} />
                 <MetaItem label="Versão do estudo" value={estudo.versao || 'v1.0'} />
-                <MetaItem label="Tipo" value="Loteamento" />
+                <MetaItem label="Tipo" value={rotuloTipo(estudo.tipo_empreendimento, estudo.finalidade)} />
                 <MetaItem
                   label={`Lotes (${premissas.quadras?.length ?? 0} quadras)`}
                   value={`${premissas.lotes?.length ?? premissas.qtdLotes}`}
