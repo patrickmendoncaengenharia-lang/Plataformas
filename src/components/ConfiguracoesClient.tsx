@@ -45,7 +45,15 @@ export default function ConfiguracoesClient({
   premissas,
 }: {
   estudoId: string;
-  estudo: { nome: string; cidade: string; estado: string; spe: string; proprietario: string };
+  estudo: {
+    nome: string;
+    cidade: string;
+    estado: string;
+    spe: string;
+    proprietario: string;
+    responsavel_nome: string;
+    responsavel_crea: string;
+  };
   premissas: Premissas;
 }) {
   const router = useRouter();
@@ -56,6 +64,8 @@ export default function ConfiguracoesClient({
   const [estado, setEstado] = useState(estudo.estado);
   const [spe, setSpe] = useState(estudo.spe);
   const [proprietario, setProprietario] = useState(estudo.proprietario);
+  const [responsavelNome, setResponsavelNome] = useState(estudo.responsavel_nome);
+  const [responsavelCrea, setResponsavelCrea] = useState(estudo.responsavel_crea);
 
   const [valorTerra, setValorTerra] = useState(premissas.valorTerraEconomico);
   const [areaBruta, setAreaBruta] = useState(premissas.areaGleba);
@@ -176,6 +186,8 @@ export default function ConfiguracoesClient({
         estado,
         spe,
         proprietario,
+        responsavel_nome: responsavelNome,
+        responsavel_crea: responsavelCrea,
         premissas: novaPremissas,
         atualizado_em: new Date().toISOString(),
       })
@@ -221,6 +233,12 @@ export default function ConfiguracoesClient({
         </Campo>
         <Campo label="Proprietário">
           <input value={proprietario} onChange={(e) => setProprietario(e.target.value)} />
+        </Campo>
+        <Campo label="Responsável pelo estudo">
+          <input value={responsavelNome} onChange={(e) => setResponsavelNome(e.target.value)} />
+        </Campo>
+        <Campo label="Registro (CREA/CAU)">
+          <input value={responsavelCrea} onChange={(e) => setResponsavelCrea(e.target.value)} />
         </Campo>
       </Secao>
 

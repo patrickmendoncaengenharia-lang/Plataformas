@@ -46,6 +46,8 @@ export default function NovoEstudoPage() {
   const [cidade, setCidade] = useState('');
   const [estado, setEstado] = useState('');
   const [spe, setSpe] = useState('');
+  const [responsavelNome, setResponsavelNome] = useState('');
+  const [responsavelCrea, setResponsavelCrea] = useState('');
   const [proprietario, setProprietario] = useState('');
 
   const [areaGleba, setAreaGleba] = useState(0);
@@ -144,6 +146,8 @@ export default function NovoEstudoPage() {
         estado,
         spe,
         proprietario,
+        responsavel_nome: responsavelNome,
+        responsavel_crea: responsavelCrea,
         premissas,
       })
       .select('id')
@@ -181,6 +185,12 @@ export default function NovoEstudoPage() {
             </Campo>
             <Campo label="Proprietario">
               <input value={proprietario} onChange={(e) => setProprietario(e.target.value)} />
+            </Campo>
+            <Campo label="Responsavel pelo estudo">
+              <input value={responsavelNome} onChange={(e) => setResponsavelNome(e.target.value)} />
+            </Campo>
+            <Campo label="Registro (CREA/CAU)">
+              <input value={responsavelCrea} onChange={(e) => setResponsavelCrea(e.target.value)} />
             </Campo>
           </Secao>
 
