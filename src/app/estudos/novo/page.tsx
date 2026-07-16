@@ -65,6 +65,7 @@ export default function NovoEstudoPage() {
   const [jurosPrice, setJurosPrice] = useState(0.8);
 
   const [mesInicioVendas, setMesInicioVendas] = useState(8);
+  const [prazoVendas, setPrazoVendas] = useState(0);
   const [mesInicioObras, setMesInicioObras] = useState(7);
   const [prazoObra, setPrazoObra] = useState(18);
   const [custoObraTotal, setCustoObraTotal] = useState(0);
@@ -116,6 +117,7 @@ export default function NovoEstudoPage() {
       jurosPrice: jurosPrice / 100,
       tma: tma / 100,
       mesInicioVendas,
+      mesFimVendas: prazoVendas > 0 ? mesInicioVendas + prazoVendas : undefined,
       mesInicioObras,
       prazoObra,
       pctComissao: pctComissao / 100,
@@ -234,6 +236,9 @@ export default function NovoEstudoPage() {
             <Campo label="Mes de inicio das vendas">
               <input type="number" value={mesInicioVendas} onChange={(e) => setMesInicioVendas(+e.target.value)} />
             </Campo>
+            <Campo label="Prazo de vendas (meses ate vender 100%)">
+              <input type="number" value={prazoVendas} onChange={(e) => setPrazoVendas(+e.target.value)} />
+            </Campo>
             <Campo label="Mes de inicio da obra">
               <input type="number" value={mesInicioObras} onChange={(e) => setMesInicioObras(+e.target.value)} />
             </Campo>
@@ -245,7 +250,8 @@ export default function NovoEstudoPage() {
             </Campo>
           </Secao>
           <p className="-mt-3 text-[11.5px]" style={{ color: 'var(--text-3)' }}>
-            Distribuicao automatica por mes. O cronograma fisico-financeiro detalhado por etapa pode ser editado depois de criar o estudo.
+            Prazo de vendas 0 = venda instantanea no mes de lancamento (100% do estoque). Distribuicao de obra automatica por mes.
+            O cronograma fisico-financeiro detalhado por etapa pode ser editado depois de criar o estudo.
           </p>
 
           <Secao titulo="Custos">

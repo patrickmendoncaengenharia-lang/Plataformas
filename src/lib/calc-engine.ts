@@ -28,6 +28,10 @@ export interface DatasEmpreendimento {
   registro?: string;
   inicioObras?: string;
   lancamento?: string;
+  /** data em que o estoque de lotes deve estar 100% vendido — traduzida para
+   * mesFimVendas (janela de absorcao). Se omitida, venda e instantanea no mes
+   * de lancamento (mesFimVendas = mesInicioVendas). */
+  fimVendas?: string;
   entrega?: string;
   encerramento?: string;
 }

@@ -78,6 +78,12 @@ export default function ConfiguracoesClient({
   );
   const [tma, setTma] = useState(paraPct(premissas.tma));
 
+  // Velocidade de vendas — em quanto tempo o estoque de lotes sera vendido.
+  const [tipoCurvaVendas, setTipoCurvaVendas] = useState<'linear' | 'scurve'>(
+    premissas.tipoCurvaVendas === 'scurve' ? 'scurve' : 'linear'
+  );
+  const [steepnessSCurve, setSteepnessSCurve] = useState(premissas.steepnessSCurve ?? 0.35);
+
   // Despesas variaveis (% sobre receita ou custo direto, conforme o motor).
   const [pctComissao, setPctComissao] = useState(paraPct(premissas.pctComissao));
   const [pctMarketing, setPctMarketing] = useState(paraPct(premissas.pctMarketing));
@@ -106,10 +112,13 @@ export default function ConfiguracoesClient({
 
   const derivados = useMemo(() => {
     const mesInicioVendas = datas.lancamento ? mesesEntre(datas.dataBase, datas.lancamento) : null;
+    const mesFimVendas = datas.fimVendas ? mesesEntre(datas.dataBase, datas.fimVendas) : null;
     const mesInicioObras = datas.inicioObras ? mesesEntre(datas.dataBase, datas.inicioObras) : null;
     const prazoObra =
       datas.inicioObras && datas.entrega ? mesesEntre(datas.inicioObras, datas.entrega) : null;
-    return { mesInicioVendas, mesInicioObras, prazoObra };
+    const janelaVendas =
+      mesInicioVendas !== null && mesFimVendas !== null ? Math.max(0, mesFimVendas - mesInicioVendas) : null;
+    return { mesInicioVendas, mesFimVendas, mesInicioObras, prazoObra, janelaVendas };
   }, [datas]);
 
   const qtdLotesAtual = premissas.lotes && premissas.lotes.length ? premissas.lotes.length : premissas.qtdLotes;
@@ -152,6 +161,9 @@ export default function ConfiguracoesClient({
       custoJuridico,
       datas,
       mesInicioVendas: derivados.mesInicioVendas ?? premissas.mesInicioVendas,
+      mesFimVendas: derivados.mesFimVendas ?? premissas.mesFimVendas,
+      tipoCurvaVendas,
+      steepnessSCurve,
       mesInicioObras: derivados.mesInicioObras ?? premissas.mesInicioObras,
       prazoObra: derivados.prazoObra ?? premissas.prazoObra,
     };
@@ -187,6 +199,7 @@ export default function ConfiguracoesClient({
     { key: 'registro', label: 'Registro' },
     { key: 'inicioObras', label: 'Início das obras' },
     { key: 'lancamento', label: 'Lançamento (início das vendas)' },
+    { key: 'fimVendas', label: '100% vendido até (fim das vendas)' },
     { key: 'entrega', label: 'Entrega' },
     { key: 'encerramento', label: 'Encerramento' },
   ];
@@ -269,6 +282,22 @@ export default function ConfiguracoesClient({
         <Campo label="TMA (% a.a.)">
           <input type="number" step="0.1" value={tma} onChange={(e) => setTma(+e.target.value)} />
         </Campo>
+        <Campo label="Curva de absorção das vendas">
+          <select value={tipoCurvaVendas} onChange={(e) => setTipoCurvaVendas(e.target.value as 'linear' | 'scurve')}>
+            <option value="linear">Linear (ritmo constante)</option>
+            <option value="scurve">S-Curve (devagar → rápido → devagar)</option>
+          </select>
+        </Campo>
+        {tipoCurvaVendas === 'scurve' && (
+          <Campo label="Inclinação da S-Curve">
+            <input
+              type="number"
+              step="0.05"
+              value={steepnessSCurve}
+              onChange={(e) => setSteepnessSCurve(+e.target.value)}
+            />
+          </Campo>
+        )}
         {!mixValido && (
           <div className="col-span-full text-[11.5px]" style={{ color: 'var(--crit)' }}>
             À vista + tabela curta + tabela longa deve somar 100% — ajuste os campos acima.
@@ -338,13 +367,24 @@ export default function ConfiguracoesClient({
           <div className="mb-2 font-semibold" style={{ color: 'var(--text)' }}>
             Traduzido para o motor de cálculo
           </div>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <div>
               Lançamento (início das vendas):{' '}
               <b className="num" style={{ color: 'var(--text)' }}>
                 {derivados.mesInicioVendas !== null ? `mês ${derivados.mesInicioVendas}` : '—'}
               </b>
               {datas.lancamento && <div>{fmtMesAno(datas.lancamento)}</div>}
+            </div>
+            <div>
+              Janela de absorção (100% vendido):{' '}
+              <b className="num" style={{ color: 'var(--text)' }}>
+                {derivados.janelaVendas !== null
+                  ? derivados.janelaVendas === 0
+                    ? 'instantânea (mesmo mês)'
+                    : `${derivados.janelaVendas} meses`
+                  : 'instantânea (sem data de fim informada)'}
+              </b>
+              {datas.fimVendas && <div>{fmtMesAno(datas.fimVendas)}</div>}
             </div>
             <div>
               Início das obras:{' '}
