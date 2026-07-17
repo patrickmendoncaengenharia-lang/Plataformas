@@ -52,7 +52,7 @@ export default function ImagemHero({ estudoId, imagemUrl }: { estudoId: string; 
 
   return (
     <div
-      className={`flex h-full flex-col overflow-hidden rounded-[20px] border ${imagemUrl ? '' : 'no-print'}`}
+      className={`print-avoid-break flex h-full flex-col overflow-hidden rounded-[20px] border ${imagemUrl ? '' : 'no-print'}`}
       style={{ background: 'var(--surface-3)', borderColor: 'var(--border)' }}
     >
       <input
@@ -68,7 +68,12 @@ export default function ImagemHero({ estudoId, imagemUrl }: { estudoId: string; 
       {imagemUrl ? (
         <div className="relative flex-1">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={imagemUrl} alt="Imagem do projeto" className="h-full w-full object-cover" style={{ minHeight: 190 }} />
+          <img
+            src={imagemUrl}
+            alt="Imagem do projeto"
+            className="h-full w-full object-cover print:max-h-[110mm] print:w-full"
+            style={{ minHeight: 190 }}
+          />
           <div className="no-print absolute right-2 top-2 flex gap-2">
             <button
               onClick={() => inputRef.current?.click()}
