@@ -138,7 +138,7 @@ export default async function EstudoPublicoPage({ params }: { params: Promise<{ 
               <img
                 src={estudo.imagem_url}
                 alt="Imagem do projeto"
-                className="h-full w-full object-cover print:max-h-[110mm] print:w-full"
+                className="h-full w-full object-cover print:h-auto print:max-h-[110mm] print:w-full print:object-contain"
                 style={{ minHeight: 190 }}
               />
             </div>

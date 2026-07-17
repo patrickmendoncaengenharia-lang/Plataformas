@@ -71,7 +71,7 @@ export default function ImagemHero({ estudoId, imagemUrl }: { estudoId: string; 
           <img
             src={imagemUrl}
             alt="Imagem do projeto"
-            className="h-full w-full object-cover print:max-h-[110mm] print:w-full"
+            className="h-full w-full object-cover print:h-auto print:max-h-[110mm] print:w-full print:object-contain"
             style={{ minHeight: 190 }}
           />
           <div className="no-print absolute right-2 top-2 flex gap-2">
