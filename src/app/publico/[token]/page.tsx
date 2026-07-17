@@ -131,11 +131,16 @@ export default async function EstudoPublicoPage({ params }: { params: Promise<{ 
           </div>
           {estudo.imagem_url && (
             <div
-              className="overflow-hidden rounded-[20px] border"
+              className="print-avoid-break overflow-hidden rounded-[20px] border"
               style={{ background: 'var(--surface-3)', borderColor: 'var(--border)' }}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={estudo.imagem_url} alt="Imagem do projeto" className="h-full w-full object-cover" style={{ minHeight: 190 }} />
+              <img
+                src={estudo.imagem_url}
+                alt="Imagem do projeto"
+                className="h-full w-full object-cover print:max-h-[110mm] print:w-full"
+                style={{ minHeight: 190 }}
+              />
             </div>
           )}
         </div>
