@@ -98,7 +98,7 @@ export default function ParecerExecutivoCard({
         <span>
           {nomeEstudo} — {localizacao} · {responsavelNome}, Eng. Civil, {responsavelCrea}
         </span>
-        <span>Estudo de viabilidade econômico-financeira · v{versao}</span>
+        <span>Estudo de viabilidade econômico-financeira · {versao.startsWith('v') ? versao : `v${versao}`}</span>
       </div>
     </div>
   );
