@@ -16,7 +16,7 @@ export default function TopBar({ email }: { email: string }) {
 
   return (
     <div
-      className="sticky top-0 z-40 border-b backdrop-blur"
+      className="no-print sticky top-0 z-40 border-b backdrop-blur"
       style={{ background: 'rgba(10,10,15,.86)', borderColor: 'var(--border)' }}
     >
       <div className="mx-auto flex max-w-[1100px] items-center gap-3 px-6 py-3.5">

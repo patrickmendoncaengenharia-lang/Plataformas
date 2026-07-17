@@ -41,7 +41,7 @@ export default function ParecerExecutivoCard({
 
   return (
     <div
-      className="overflow-hidden rounded-[20px] border"
+      className="print-avoid-break overflow-hidden rounded-[20px] border"
       style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}
     >
       <div className="grid grid-cols-1 gap-6 p-6 lg:grid-cols-[1fr_1.3fr]">

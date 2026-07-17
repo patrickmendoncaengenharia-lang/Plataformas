@@ -14,6 +14,8 @@ import {
 import TopBar from '@/components/TopBar';
 import ImagemHero from '@/components/ImagemHero';
 import CompartilharDashboard from '@/components/CompartilharDashboard';
+import ExportarPdfButton from '@/components/ExportarPdfButton';
+import PdfCover from '@/components/PdfCover';
 import EstudoDashboardBody from '@/components/EstudoDashboardBody';
 
 function MetaItem({ label, value }: { label: string; value: string }) {
@@ -70,18 +72,31 @@ export default async function EstudoPage({ params }: { params: Promise<{ id: str
       <TopBar email={user?.email ?? ''} />
 
       <main className="mx-auto max-w-[1100px] px-6 py-8">
-        <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="no-print flex flex-wrap items-center justify-between gap-3">
           <Link href="/dashboard" className="text-[12px]" style={{ color: 'var(--text-3)' }}>
             ← Meus estudos
           </Link>
-          {estudo.public_token && (
-            <CompartilharDashboard
-              estudoId={id}
-              publicToken={estudo.public_token}
-              publicoHabilitadoInicial={!!estudo.publico_habilitado}
-            />
-          )}
+          <div className="flex flex-wrap items-center gap-2">
+            <ExportarPdfButton />
+            {estudo.public_token && (
+              <CompartilharDashboard
+                estudoId={id}
+                publicToken={estudo.public_token}
+                publicoHabilitadoInicial={!!estudo.publico_habilitado}
+              />
+            )}
+          </div>
         </div>
+
+        <PdfCover
+          nomeEstudo={estudo.nome}
+          localizacao={[estudo.cidade, estudo.estado].filter(Boolean).join(' / ') || 'Localização não informada'}
+          tipoLabel={rotuloTipo(estudo.tipo_empreendimento, estudo.finalidade)}
+          responsavelNome={estudo.responsavel_nome || ''}
+          responsavelCrea={estudo.responsavel_crea ? `CREA ${estudo.responsavel_crea}` : ''}
+          dataBase={fmtData(premissas.datas?.dataBase) || fmtData(estudo.data_base)}
+          versao={estudo.versao}
+        />
 
         <div className="mt-3 mb-6 grid grid-cols-1 gap-4 lg:grid-cols-[1.15fr_.85fr]">
           <div
@@ -122,7 +137,7 @@ export default async function EstudoPage({ params }: { params: Promise<{ id: str
           <ImagemHero estudoId={id} imagemUrl={estudo.imagem_url ?? null} />
         </div>
 
-        <div className="mb-6 flex flex-wrap gap-2">
+        <div className="no-print mb-6 flex flex-wrap gap-2">
           {[
             ['Configurações', 'configuracoes'],
             ['Lotes', 'lotes'],

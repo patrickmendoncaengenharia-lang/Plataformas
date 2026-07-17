@@ -40,7 +40,7 @@ export default function RiskGauge({
 
   return (
     <div
-      className="flex flex-col items-center rounded-[16px] border p-4"
+      className="print-avoid-break flex flex-col items-center rounded-[16px] border p-4"
       style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}
     >
       <svg width={size} height={size / 2 + 26} viewBox={`0 0 ${size} ${size / 2 + 26}`} role="img" aria-label={`${label}: ${nivel}`}>

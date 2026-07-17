@@ -62,3 +62,64 @@ input:focus, select:focus, textarea:focus {
 button {
   font-family: inherit;
 }
+
+/* ---------------------------------------------------------------------
+   Exportacao em PDF (window.print) — reusa o dashboard inteiro (KPIs,
+   graficos, riscos, oportunidades, parecer) trocando so a paleta de cor
+   pra um tema claro/profissional, ja que todo componente le as cores via
+   var(--...). Nenhum componente precisa saber que esta sendo impresso.
+   --------------------------------------------------------------------- */
+@media print {
+  @page {
+    size: A4;
+    margin: 14mm 12mm;
+  }
+
+  :root {
+    --bg: #ffffff;
+    --surface: #ffffff;
+    --surface-2: #f4f5f8;
+    --surface-3: #ffffff;
+    --border: #d8dae3;
+    --border-strong: #b9bcc9;
+    --text: #14151c;
+    --text-2: #4a4d5c;
+    --text-3: #7a7d8c;
+    --accent: #2563c9;
+    --accent-soft: rgba(37,99,201,.10);
+    --good: #178a52;
+    --good-soft: rgba(23,138,82,.10);
+    --warn: #b8790a;
+    --warn-soft: rgba(184,121,10,.10);
+    --crit: #c03139;
+    --crit-soft: rgba(192,49,57,.10);
+  }
+
+  html, body {
+    background: #fff !important;
+  }
+  body {
+    background: #fff !important;
+  }
+
+  .print-hidden,
+  .no-print {
+    display: none !important;
+  }
+
+  .print-cover {
+    display: flex !important;
+  }
+
+  .print-avoid-break {
+    break-inside: avoid;
+  }
+
+  a[href]::after {
+    content: none !important;
+  }
+}
+
+.print-cover {
+  display: none;
+}

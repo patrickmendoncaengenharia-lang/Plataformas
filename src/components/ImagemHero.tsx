@@ -52,7 +52,7 @@ export default function ImagemHero({ estudoId, imagemUrl }: { estudoId: string; 
 
   return (
     <div
-      className="flex h-full flex-col overflow-hidden rounded-[20px] border"
+      className={`flex h-full flex-col overflow-hidden rounded-[20px] border ${imagemUrl ? '' : 'no-print'}`}
       style={{ background: 'var(--surface-3)', borderColor: 'var(--border)' }}
     >
       <input
@@ -69,7 +69,7 @@ export default function ImagemHero({ estudoId, imagemUrl }: { estudoId: string; 
         <div className="relative flex-1">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={imagemUrl} alt="Imagem do projeto" className="h-full w-full object-cover" style={{ minHeight: 190 }} />
-          <div className="absolute right-2 top-2 flex gap-2">
+          <div className="no-print absolute right-2 top-2 flex gap-2">
             <button
               onClick={() => inputRef.current?.click()}
               disabled={enviando}
@@ -92,7 +92,7 @@ export default function ImagemHero({ estudoId, imagemUrl }: { estudoId: string; 
         <button
           onClick={() => inputRef.current?.click()}
           disabled={enviando}
-          className="flex flex-1 flex-col items-center justify-center gap-2 p-6 text-center"
+          className="no-print flex flex-1 flex-col items-center justify-center gap-2 p-6 text-center"
           style={{ minHeight: 190, color: 'var(--text-2)' }}
         >
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">

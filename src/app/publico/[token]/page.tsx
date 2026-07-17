@@ -11,11 +11,22 @@ import {
 } from '@/lib/calc-engine';
 import { createPublicClient } from '@/lib/supabase/public';
 import EstudoDashboardBody from '@/components/EstudoDashboardBody';
+import ExportarPdfButton from '@/components/ExportarPdfButton';
+import PdfCover from '@/components/PdfCover';
 
 function fmtData(iso?: string): string {
   if (!iso) return '—';
   const [y, m, d] = iso.split('-');
   return `${d}/${m}/${y}`;
+}
+
+const TIPO_LABEL: Record<string, string> = { loteamento: 'Loteamento', condominio: 'Condomínio' };
+const FINALIDADE_LABEL: Record<string, string> = { residencial: 'Residencial', comercial: 'Comercial', misto: 'Uso Misto' };
+
+function rotuloTipo(tipo?: string, finalidade?: string): string {
+  const t = TIPO_LABEL[tipo ?? 'loteamento'] ?? 'Loteamento';
+  const f = FINALIDADE_LABEL[finalidade ?? 'residencial'] ?? 'Residencial';
+  return `${t} ${f}`;
 }
 
 export default async function EstudoPublicoPage({ params }: { params: Promise<{ token: string }> }) {
@@ -37,7 +48,7 @@ export default async function EstudoPublicoPage({ params }: { params: Promise<{ 
   return (
     <div className="min-h-screen">
       <div
-        className="sticky top-0 z-40 border-b backdrop-blur"
+        className="no-print sticky top-0 z-40 border-b backdrop-blur"
         style={{ background: 'rgba(10,10,15,.86)', borderColor: 'var(--border)' }}
       >
         <div className="mx-auto flex max-w-[1100px] items-center gap-3 px-6 py-3.5">
@@ -52,10 +63,21 @@ export default async function EstudoPublicoPage({ params }: { params: Promise<{ 
           >
             Visualização — somente leitura
           </span>
+          <ExportarPdfButton />
         </div>
       </div>
 
       <main className="mx-auto max-w-[1100px] px-6 py-8">
+        <PdfCover
+          nomeEstudo={estudo.nome}
+          localizacao={[estudo.cidade, estudo.estado].filter(Boolean).join(' / ') || 'Localização não informada'}
+          tipoLabel={rotuloTipo(estudo.tipo_empreendimento, estudo.finalidade)}
+          responsavelNome={estudo.responsavel_nome || ''}
+          responsavelCrea={estudo.responsavel_crea ? `CREA ${estudo.responsavel_crea}` : ''}
+          dataBase={fmtData(premissas.datas?.dataBase) || fmtData(estudo.data_base)}
+          versao={estudo.versao}
+        />
+
         <div className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-[1.15fr_.85fr]">
           <div
             className="relative overflow-hidden rounded-[20px] border p-7"

@@ -30,7 +30,7 @@ const STATUS_LABEL: Record<string, string> = {
 function Kpi({ label, value }: { label: string; value: string }) {
   return (
     <div
-      className="rounded-[16px] border p-4 transition-transform hover:-translate-y-0.5"
+      className="print-avoid-break rounded-[16px] border p-4 transition-transform hover:-translate-y-0.5"
       style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}
     >
       <div className="mb-2 text-[11px] font-semibold uppercase tracking-wide" style={{ color: 'var(--text-2)' }}>
@@ -73,7 +73,7 @@ function KpiChave({
 }) {
   return (
     <div
-      className="rounded-[16px] border p-4 transition-transform hover:-translate-y-0.5"
+      className="print-avoid-break rounded-[16px] border p-4 transition-transform hover:-translate-y-0.5"
       style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}
     >
       <div className="mb-2 text-[11px] font-semibold uppercase tracking-wide" style={{ color: 'var(--text-2)' }}>
@@ -130,7 +130,7 @@ function RateCard({
   const spread = !na && !isTma && tma !== undefined ? anual - tma : null;
   const status = na ? { label: 'Não aplicável', color: 'var(--warn)' } : spread !== null ? spreadStatus(spread) : null;
   return (
-    <div className="rounded-[16px] border p-4" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
+    <div className="print-avoid-break rounded-[16px] border p-4" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
       <div className="mb-3 flex items-start justify-between gap-2">
         <div>
           <b className="text-[14px] font-bold">{titulo}</b>
@@ -293,7 +293,7 @@ export default function EstudoDashboardBody({
   return (
     <>
       <div
-        className="mb-8 flex items-center gap-6 rounded-[20px] border p-6"
+        className="print-avoid-break mb-8 flex items-center gap-6 rounded-[20px] border p-6"
         style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}
       >
         <div>

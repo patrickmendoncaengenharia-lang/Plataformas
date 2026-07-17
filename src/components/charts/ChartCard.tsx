@@ -10,7 +10,7 @@ export default function ChartCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-[16px] border p-4" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
+    <div className="print-avoid-break rounded-[16px] border p-4" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
       <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
         <div>
           <b className="text-[14px] font-bold">{title}</b>

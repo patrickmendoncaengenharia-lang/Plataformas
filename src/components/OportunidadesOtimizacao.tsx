@@ -6,7 +6,7 @@ export default function OportunidadesOtimizacao({ oportunidades }: { oportunidad
       {oportunidades.map((o, i) => (
         <div
           key={i}
-          className="flex items-start gap-3 rounded-[14px] border p-4"
+          className="print-avoid-break flex items-start gap-3 rounded-[14px] border p-4"
           style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}
         >
           <span
